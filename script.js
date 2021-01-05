@@ -6,7 +6,7 @@ const websiteNameEl = document.getElementById('website-name');
 const websiteUrlEl = document.getElementById('website-url');
 const bookmarksContainer = document.getElementById('bookmarks-container');
 
-let bookmarks = [];
+let bookmarks = {};
 
 // Show Modal, Focus on Input
 const showModal = () => {
@@ -47,8 +47,8 @@ const buildBookmarks = () => {
   // Remove all bookmark elements
   bookmarksContainer.textContent = '';
   // Build items
-  bookmarks.forEach((bookmark) => {
-    const { name, url } = bookmark;
+  Object.keys(bookmarks).forEach((id) => {
+    const { name, url } = bookmarks[id];
     // Item
     const item = document.createElement('div');
     item.classList.add('item');
@@ -56,7 +56,7 @@ const buildBookmarks = () => {
     const closeIcon = document.createElement('i');
     closeIcon.classList.add('fas', 'fa-times');
     closeIcon.setAttribute('title', 'Delete Bookmark');
-    closeIcon.setAttribute('onClick', `deleteBookmark('${url}')`);
+    closeIcon.setAttribute('onClick', `deleteBookmark('${id}')`);
     // Favicon / Link Container
     const linkInfo = document.createElement('div');
     linkInfo.classList.add('name');
@@ -86,24 +86,22 @@ const fetchBookmarks = () => {
     bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
   } else {
     // Create bookmarks array in localStorage
-    bookmarks = [
-      {
-        name: 'Jacitno Design',
-        url: 'https://jacinto.design',
-      },
-    ];
+    const id = `https://jacinto.design`;
+    bookmarks[id] = {
+      name: 'Jacitno Design',
+      url: 'https://jacinto.design',
+    };
     localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
   }
   buildBookmarks();
 };
 
 // Delete Bookmark
-const deleteBookmark = (url) => {
-  bookmarks.forEach((bookmark, i) => {
-    if (bookmark.url === url) {
-      bookmarks.splice(i, 1);
-    }
-  });
+const deleteBookmark = (id) => {
+  if (bookmarks[id]) {
+    delete bookmarks[id];
+  }
+
   // Update bookmarks array in localStorage, re-populate DOM
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
   fetchBookmarks();
@@ -127,7 +125,8 @@ const storeBookmark = (e) => {
     name: nameValue,
     url: urlValue,
   };
-  bookmarks.push(bookmark);
+  
+  bookmarks[urlValue] = bookmark;
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
   fetchBookmarks();
   bookmarkForm.reset();
